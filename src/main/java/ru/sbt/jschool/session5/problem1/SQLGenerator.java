@@ -14,9 +14,9 @@ public class SQLGenerator {
         s += "(";
         Field[] Fields = clazz.getDeclaredFields();
         ArrayList<String> into = getColumnsNames(Fields, true, true);
-        s += makeStringFromColumns(into);
+        s += makeStringFromColumns(into, ", ", "");
         s += ") VALUES (";
-        for (int i = 0; i < into.size() - 1; i++){
+        for (int i = 0; i < into.size() - 1; i++) {
             s += "?, ";
         }
         s += "?)";
@@ -31,9 +31,9 @@ public class SQLGenerator {
         Field[] Fields = clazz.getDeclaredFields();
         ArrayList<String> select = getColumnsNames(Fields, true, false);
         ArrayList<String> where = getColumnsNames(Fields, false, true);
-        s += makeStringForWhere(select, ", ");
+        s += makeStringFromColumns(select, " = ?, ", " = ?");
         s += " WHERE ";
-        s += makeStringForWhere(where, " AND ");
+        s += makeStringFromColumns(where, " = ? AND ", " = ?");
         return s;
     }
 
@@ -44,7 +44,7 @@ public class SQLGenerator {
         Field[] Fields = clazz.getDeclaredFields();
         ArrayList<String> where = getColumnsNames(Fields, false, true);
         s += " WHERE ";
-        s += makeStringForWhere(where, " AND ");
+        s += makeStringFromColumns(where, " = ? AND ", " = ?");
         return s;
     }
 
@@ -54,16 +54,16 @@ public class SQLGenerator {
         Field[] Fields = clazz.getDeclaredFields();
         ArrayList<String> select = getColumnsNames(Fields, true, false);
         ArrayList<String> where = getColumnsNames(Fields, false, true);
-        s += makeStringFromColumns(select);
+        s += makeStringFromColumns(select, ", ", "");
         s += " FROM ";
         String tableName = clazz.getAnnotation(Table.class).name();
         s += tableName;
         s += " WHERE ";
-        s += makeStringForWhere(where, " AND ");
+        s += makeStringFromColumns(where, " = ? AND ", " = ?");
         return s;
     }
 
-    public <T> ArrayList<String> getColumnsNames(Field[] Fields, boolean getColumns, boolean getPrimaryKey){
+    public <T> ArrayList<String> getColumnsNames(Field[] Fields, boolean getColumns, boolean getPrimaryKey) {
         ArrayList<String> columsNames = new ArrayList<>();
         for (int i = 0; i < Fields.length; i++) {
             try {
@@ -75,8 +75,7 @@ public class SQLGenerator {
                         columsNames.add(Fields[i].getName().toLowerCase());
                     }
                 }
-            }
-            catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 e.getMessage();
             }
             try {
@@ -88,37 +87,23 @@ public class SQLGenerator {
                         columsNames.add(Fields[i].getName().toLowerCase());
                     }
                 }
-            }
-            catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 e.getMessage();
             }
         }
         return columsNames;
     }
 
-    // t, f, g
-    public <T> String makeStringFromColumns(ArrayList<String> columnsNames){
+    // t sep f sep g end
+    public <T> String makeStringFromColumns(ArrayList<String> columnsNames, String sep, String end) {
         int size = columnsNames.size();
         String s = "";
-        for (int i = 0; i < size - 1; i++){
+        for (int i = 0; i < size - 1; i++) {
             s += columnsNames.get(i);
-            s += ", ";
-        }
-        s += columnsNames.get(size - 1);
-        return s;
-    }
-
-    // T = ? AND (, ) G = ?
-    public <T> String makeStringForWhere(ArrayList<String> columnsNames, String sep){
-        int size = columnsNames.size();
-        String s = "";
-        for (int i = 0; i < size - 1; i++){
-            s += columnsNames.get(i);
-            s += " = ?";
             s += sep;
         }
         s += columnsNames.get(size - 1);
-        s += " = ?";
+        s += end;
         return s;
     }
 }
