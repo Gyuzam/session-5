@@ -66,29 +66,29 @@ public class SQLGenerator {
     public <T> ArrayList<String> getColumnsNames(Field[] Fields, boolean getColumns, boolean getPrimaryKey) {
         ArrayList<String> columsNames = new ArrayList<>();
         for (int i = 0; i < Fields.length; i++) {
-            try {
-                if (getColumns) {
+            if (getColumns) {
+                try {
                     String str = Fields[i].getAnnotation(Column.class).name();
                     if (!str.equals("")) {
                         columsNames.add(str.toLowerCase());
                     } else {
                         columsNames.add(Fields[i].getName().toLowerCase());
                     }
+                } catch (NullPointerException e) {
+                    e.getMessage();
                 }
-            } catch (NullPointerException e) {
-                e.getMessage();
             }
-            try {
-                if (getPrimaryKey) {
+            if (getPrimaryKey) {
+                try {
                     String str = Fields[i].getAnnotation(PrimaryKey.class).name();
                     if (!str.equals("")) {
                         columsNames.add(str.toLowerCase());
                     } else {
                         columsNames.add(Fields[i].getName().toLowerCase());
                     }
+                } catch (NullPointerException e) {
+                    e.getMessage();
                 }
-            } catch (NullPointerException e) {
-                e.getMessage();
             }
         }
         return columsNames;
